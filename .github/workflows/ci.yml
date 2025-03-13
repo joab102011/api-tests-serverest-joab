@@ -19,20 +19,22 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install newman
-        run: npm install -g newman newman-reporter-html
+      - name: Install newman and reporters
+        run: npm install -g newman newman-reporter-html newman-reporter-junit
 
       - name: Run Postman Collection
         run: |
           newman run postman/Serverest.postman_collection.json \
             --environment postman/Serverest.postman_environment.json \
-            --reporters cli,html \
+            --reporters cli,junit,html \
+            --reporter-junit-export "newman-report.xml" \
             --reporter-html-export "report.html"
 
       - name: List generated files (debug)
         run: ls -l
 
       - name: Upload JUnit Test Results
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: newman-junit-report
