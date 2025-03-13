@@ -31,13 +31,13 @@ jobs:
             --reporter-html-export "newman-report.html"
             
       - name: Upload JUnit Test Results
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: newman-junit-report
           path: newman-report.xml
 
       - name: Upload HTML Test Results
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: newman-html-report
           path: newman-report.html
