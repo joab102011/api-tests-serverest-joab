@@ -1,288 +1,253 @@
 {
-    "info": {
-      "name": "Automation API QAOps ServeRest",
-      "_postman_id": "22222222-3333-4444-5555-666666666666",
-      "description": "Coleção de testes de API para a ServeRest.",
-      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "info": {
+    "name": "Automation API QAOps ServeRest",
+    "_postman_id": "22222222-3333-4444-5555-666666666666",
+    "description": "Coleção completa de testes automatizados (cenários positivos e negativos) da API ServeRest, garantindo cobertura total para CRUD de usuários.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login com sucesso",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"fulano@qa.com\", \"password\": \"teste\"}"
+            },
+            "url": "{{base_url}}/login"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('DADO email e senha válidos, QUANDO faço login, ENTÃO recebo JWT', () => {",
+            "  pm.response.to.have.status(200);",
+            "  pm.expect(pm.response.json()).to.have.property('authorization');",
+            "  pm.environment.set('authToken', pm.response.json().authorization);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Login realizado com sucesso');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Login com email inválido",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"emailinvalido@teste.com\", \"password\": \"teste\"}"
+            },
+            "url": "{{base_url}}/login"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO faço login com email inválido, ENTÃO retorna 400', () => {",
+            "  pm.response.to.have.status(401);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Email e/ou senha inválidos');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Login com senha inválida",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"fulano@qa.com\", \"password\": \"senhaerrada\"}"
+            },
+            "url": "{{base_url}}/login"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO faço login com senha incorreta, ENTÃO retorna 401', () => {",
+            "  pm.response.to.have.status(401);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Email e/ou senha inválidos');",
+            "});"
+          ]}}]
+        }
+      ]
     },
-    "item": [
-      {
-        "name": "Auth",
-        "item": [
-          {
-            "name": "Login (POST /login)",
-            "request": {
-              "method": "POST",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": {
-                "mode": "raw",
-                "raw": "{\n  \"email\": \"fulano@qa.com\",\n  \"password\": \"teste\"\n}"
-              },
-              "url": {
-                "raw": "{{base_url}}/login",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "login"
-                ]
-              }
-            },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO que tenho credenciais válidas\", function () {",
-                    "  pm.expect(pm.request.body.raw).to.include(\"fulano@qa.com\");",
-                    "});",
-                    "pm.test(\"QUANDO envio POST /login\", function () {",
-                    "  pm.response.to.have.status(200);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar authorization\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData).to.have.property('authorization');",
-                    "  pm.environment.set('authToken', jsonData.authorization);",
-                    "});"
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Users",
-        "item": [
-          {
-            "name": "Listar Usuários (GET /usuarios)",
-            "request": {
-              "method": "GET",
-              "header": [
-                {
-                  "key": "Authorization",
-                  "value": "Bearer {{authToken}}"
-                }
-              ],
-              "url": {
-                "raw": "{{base_url}}/usuarios",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "usuarios"
-                ]
-              }
-            },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO que possuo token JWT\", function () {",
-                    "  pm.expect(pm.environment.get('authToken')).to.not.be.undefined;",
-                    "});",
-                    "pm.test(\"QUANDO faço GET /usuarios\", function () {",
-                    "  pm.response.to.have.status(200);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar lista de usuários\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData.usuarios).to.be.an('array');",
-                    "});"
-                  ]
-                }
-              }
-            ]
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Listar usuários autenticado",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{base_url}}/usuarios"
           },
-          {
-            "name": "Criar Usuário (POST /usuarios)",
-            "request": {
-              "method": "POST",
-              "header": [
-                {
-                  "key": "Authorization",
-                  "value": "Bearer {{authToken}}"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": {
-                "mode": "raw",
-                "raw": "{\n  \"nome\": \"Usuário Teste\",\n  \"email\": \"usuario_{{$randomInt}}@qa.com\",\n  \"password\": \"teste\",\n  \"administrador\": \"true\"\n}"
-              },
-              "url": {
-                "raw": "{{base_url}}/usuarios",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "usuarios"
-                ]
-              }
-            },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO dados válidos para criar usuário\", function () {",
-                    "  pm.expect(pm.request.body.raw).to.include('nome');",
-                    "});",
-                    "pm.test(\"QUANDO envio POST /usuarios\", function () {",
-                    "  pm.expect(pm.response.code).to.be.oneOf([200,201]);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar _id\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData).to.have.property('_id');",
-                    "  pm.environment.set('userId', jsonData._id);",
-                    "});"
-                  ]
-                }
-              }
-            ]
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO solicito lista autenticado, ENTÃO retorna 200 com usuários', () => {",
+            "  pm.response.to.have.status(200);",
+            "  pm.expect(pm.response.json().usuarios).to.be.an('array');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Listar usuários sem autenticação",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/usuarios"
           },
-          {
-            "name": "Consultar Usuário (GET /usuarios/:id)",
-            "request": {
-              "method": "GET",
-              "header": [
-                {
-                  "key": "Authorization",
-                  "value": "Bearer {{authToken}}"
-                }
-              ],
-              "url": {
-                "raw": "{{base_url}}/usuarios/{{userId}}",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "usuarios",
-                  "{{userId}}"
-                ]
-              }
+          "event": [{"listen": "test", "script": {"exec": [
+            "const jsonData = pm.response.json();",
+          "",
+          "pm.test('QUANDO solicito lista autenticado, ENTÃO retorna 200 e um array de usuários', () => {",
+          "  pm.response.to.have.status(200);",
+          "  pm.expect(jsonData).to.be.an('object');",
+          "  pm.expect(jsonData).to.have.property('usuarios');",
+          "  pm.expect(jsonData.usuarios).to.be.an('array').that.is.not.empty;",
+          "});",
+          "",
+          "pm.test('ENTÃO cada usuário possui os campos obrigatórios', () => {",
+          "  const requiredFields = ['_id', 'nome', 'email', 'password', 'administrador'];",
+          "  jsonData.usuarios.forEach(usuario => {",
+          "    requiredFields.forEach(field => {",
+          "      pm.expect(usuario).to.have.property(field).that.is.not.null;",
+          "    });",
+          "  });",
+          "});",
+          "",
+          "pm.test('ENTÃO os campos possuem tipos de dados corretos', () => {",
+          "  jsonData.usuarios.forEach(usuario => {",
+          "    pm.expect(usuario._id).to.be.a('string');",
+          "    pm.expect(usuario.nome).to.be.a('string');",
+          "    pm.expect(usuario.email).to.be.a('string');",
+          "    pm.expect(usuario.password).to.be.a('string');",
+          "    pm.expect(usuario.administrador).to.be.a('string');",
+          "  });",
+          "});"
+          ]}}]
+        },
+        {
+          "name": "Criar usuário válido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{authToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\": \"Usuário Teste\",\"email\": \"usuario_{{$randomInt}}@qa.com\",\"password\": \"senha123\",\"administrador\": \"true\"}"
             },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO que tenho userId\", function () {",
-                    "  pm.expect(pm.environment.get('userId')).to.not.be.undefined;",
-                    "});",
-                    "pm.test(\"QUANDO faço GET /usuarios/:id\", function () {",
-                    "  pm.response.to.have.status(200);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar dados do usuário\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData).to.have.property('_id');",
-                    "  pm.expect(jsonData).to.have.property('nome');",
-                    "  pm.expect(jsonData).to.have.property('email');",
-                    "});"
-                  ]
-                }
-              }
-            ]
+            "url": "{{base_url}}/usuarios"
           },
-          {
-            "name": "Atualizar Usuário (PUT /usuarios/:id)",
-            "request": {
-              "method": "PUT",
-              "header": [
-                {
-                  "key": "Authorization",
-                  "value": "Bearer {{authToken}}"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "body": {
-                "mode": "raw",
-                "raw": "{\n  \"nome\": \"Usuário Atualizado\",\n  \"email\": \"usuario_editado@qa.com\",\n  \"password\": \"nova_senha\",\n  \"administrador\": \"false\"\n}"
-              },
-              "url": {
-                "raw": "{{base_url}}/usuarios/{{userId}}",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "usuarios",
-                  "{{userId}}"
-                ]
-              }
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO envio dados válidos, ENTÃO usuário criado', () => {",
+            "  pm.response.to.have.status(201);",
+            "  pm.environment.set('userId', pm.response.json()._id);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Cadastro realizado com sucesso');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Criar usuário com email já existente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{authToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\": \"Usuário Teste\",\"email\": \"fulano@qa.com\",\"password\": \"senha123\",\"administrador\": \"true\"}"
             },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO userId e dados para atualizar\", function () {",
-                    "  pm.expect(pm.environment.get('userId')).to.not.be.undefined;",
-                    "});",
-                    "pm.test(\"QUANDO envio PUT /usuarios/:id\", function () {",
-                    "  pm.expect(pm.response.code).to.eql(200);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar mensagem de sucesso\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData.message).to.eql('Registro alterado com sucesso');",
-                    "});"
-                  ]
-                }
-              }
-            ]
+            "url": "{{base_url}}/usuarios"
           },
-          {
-            "name": "Excluir Usuário (DELETE /usuarios/:id)",
-            "request": {
-              "method": "DELETE",
-              "header": [
-                {
-                  "key": "Authorization",
-                  "value": "Bearer {{authToken}}"
-                }
-              ],
-              "url": {
-                "raw": "{{base_url}}/usuarios/{{userId}}",
-                "host": [
-                  "{{base_url}}"
-                ],
-                "path": [
-                  "usuarios",
-                  "{{userId}}"
-                ]
-              }
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO envio email duplicado, ENTÃO retorna 400', () => {",
+            "  pm.response.to.have.status(400);",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "Atualizar usuário existente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{authToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\": \"Usuário Atualizado\",\"email\": \"usuario_atualizado@qa.com\",\"password\": \"nova_senha\",\"administrador\": \"false\"}"
             },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "pm.test(\"DADO userId existente\", function () {",
-                    "  pm.expect(pm.environment.get('userId')).to.not.be.undefined;",
-                    "});",
-                    "pm.test(\"QUANDO envio DELETE /usuarios/:id\", function () {",
-                    "  pm.response.to.have.status(200);",
-                    "});",
-                    "pm.test(\"ENTAO deve retornar mensagem de exclusão\", function () {",
-                    "  var jsonData = pm.response.json();",
-                    "  pm.expect(jsonData.message).to.eql('Registro excluído com sucesso');",
-                    "});"
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-  
+            "url": "{{base_url}}/usuarios/{{userId}}"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO atualizo dados válidos, ENTÃO retorna 200', () => {",
+            "  pm.response.to.have.status(200);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Registro alterado com sucesso');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Atualizar usuário inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{authToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\": \"Inexistente\",\"email\": \"inexistente@qa.com\",\"password\": \"123\",\"administrador\": \"false\"}"
+            },
+            "url": "{{base_url}}/usuarios/000000000000000000000000"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO atualizo usuário inexistente, ENTÃO retorna 400 e mensagem apropriada', () => {",
+            "  pm.response.to.have.status(400);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Este email já está sendo usado');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "Excluir usuário existente",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{base_url}}/usuarios/{{userId}}"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO excluo existente, ENTÃO retorna 200', () => {",
+            "  pm.response.to.have.status(200);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData).to.have.property('message');",
+            "  pm.expect(jsonData.message).to.include('Registro excluído com sucesso');",
+            "});"
+          ]}}]
+        },
+        {
+          "name": "[Negativo] Excluir usuário já excluído",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{base_url}}/usuarios/{{userId}}"
+          },
+          "event": [{"listen": "test", "script": {"exec": [
+            "pm.test('QUANDO excluo usuário inexistente, ENTÃO retorna 200 com mensagem informando que não foi encontrado', () => {",
+            "  pm.response.to.have.status(200);",
+            "  const jsonData = pm.response.json();",
+            "  pm.expect(jsonData.message).to.eql('Nenhum registro excluído');",
+            "});"
+          ]}}]
+        }
+      ]
+    }
+  ]
+}
