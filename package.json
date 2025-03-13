@@ -1,0 +1,16 @@
+{
+  "name": "api-tests-serverest-joab",
+  "version": "1.0.0",
+  "description": "Desafio de Automação de Testes de API. Este repositório contém testes automatizados para a API ServeRest, cobrindo operações de CRUD de usuários e integração com pipeline de CI/CD (GitHub Actions) para execução e geração de relatórios de teste.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "newman": "^4.6.1",
+    "newman-reporter-html": "^1.0.5"
+  }
+}
