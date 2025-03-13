@@ -138,4 +138,10 @@ Este projeto é criado com fins educacionais e demonstrativos. Sinta-se à vonta
 
 **Contato**
 
-Para dúvidas, sugestões ou melhorias, crie um Issue neste repositório ou entre em contato via [LinkedIn](#) ou [GitHub](#).
+Para dúvidas, sugestões ou melhorias, crie um Issue neste repositório ou entre em contato via [GitHub](#).
+
+---
+
+## Documentação
+
+https://github.com/joab102011/api-tests-serverest-joab/wiki/Documenta%C3%A7%C3%A3o
