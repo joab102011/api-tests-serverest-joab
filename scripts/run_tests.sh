@@ -10,5 +10,6 @@ fi
 echo "Executando testes via Newman..."
 newman run postman/Serverest.postman_collection.json \
   --environment postman/Serverest.postman_environment.json \
-  --reporters cli,html \
+  --reporters cli,junit,html \
+  --reporter-junit-export newman-report.xml \
   --reporter-html-export report.html

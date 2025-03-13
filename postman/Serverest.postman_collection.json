@@ -2,7 +2,7 @@
     "info": {
       "name": "Automation API QAOps ServeRest",
       "_postman_id": "22222222-3333-4444-5555-666666666666",
-      "description": "Coleção de testes de API para a ServeRest, com abordagem QAOps e Page Object. Usando DADO, QUANDO, ENTAO em português.",
+      "description": "Coleção de testes de API para a ServeRest.",
       "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
